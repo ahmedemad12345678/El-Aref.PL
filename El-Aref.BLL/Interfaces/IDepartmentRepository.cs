@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace El_Aref.BLL.Interfaces
 {
-    internal interface IDepartmentRepository: IGenaricRepository<Department>
+    public interface IDepartmentRepository: IGenaricRepository<Department>
     {
     }
 }

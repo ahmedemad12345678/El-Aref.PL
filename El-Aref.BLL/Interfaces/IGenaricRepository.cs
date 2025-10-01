@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace El_Aref.BLL.Interfaces
 {
-    internal interface IGenaricRepository<T> where T : BaseEntity
+    public interface IGenaricRepository<T> where T : BaseEntity
     {
         IEnumerable<T> GetAll();
         T? Get(int id);
