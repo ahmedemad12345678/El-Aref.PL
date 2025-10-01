@@ -1,0 +1,18 @@
+﻿@model Employee
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<h1>Details Page</h1>
+<br />
+<br />
+
+<form asp-action="Details">
+    <partial name="EmployeePartialView/_DetailsDelatePartialView" />
+    <div>
+
+        <a asp-action="Index" class="btn btn-light">Back to List</a>
+    </div>
+</form>
