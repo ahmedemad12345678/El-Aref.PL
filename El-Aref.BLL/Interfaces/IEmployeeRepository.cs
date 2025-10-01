@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace El_Aref.BLL.Interfaces
 {
-    internal interface IEmployeeRepository : IGenaricRepository<Employee>
+    public interface IEmployeeRepository : IGenaricRepository<Employee>
     {
     }
 }

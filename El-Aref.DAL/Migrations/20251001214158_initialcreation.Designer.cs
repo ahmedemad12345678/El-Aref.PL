@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace El_Aref.DAL.Migrations
 {
     [DbContext(typeof(ElAreffDbContext))]
-    [Migration("20250929164129_InitialCreation")]
-    partial class InitialCreation
+    [Migration("20251001214158_initialcreation")]
+    partial class initialcreation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

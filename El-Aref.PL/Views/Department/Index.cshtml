@@ -1,4 +1,56 @@
 ﻿
+@model IEnumerable<Department>
+
+
 @*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
+
+<h1>All Deparment</h1>
+<br />
+<br />
+
+<a asp-action="Create" asp-controller="Department" class="btn btn-primary">Create Department</a>
+
+<br />
+<br />
+
+@if (Model != null && Model.Any())
+{
+    <table class=" table table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Date Of Creation</th>
+                <th>Deatails</th>
+                <th>Update</th>
+                <th>Delete</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Code</td>
+                    <td>@item.Name</td>
+                    <td>@item.CraeteAt</td>
+
+                    <partial name="_ButtonPartialView" model="@item.Id" />
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+else
+{
+    <div class=" mt-4 alert alert-info">
+        There are no Departments :(
+    </div>
+}

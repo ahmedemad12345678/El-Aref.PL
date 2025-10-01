@@ -1,4 +1,6 @@
+using El_Aref.BLL.Interfaces;
 using El_Aref.DAL.Data.Contexts;
+using EL_Areff.Comapny.BLL.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace El_Aref.PL
@@ -13,7 +15,7 @@ namespace El_Aref.PL
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddControllersWithViews();
-            //builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            builder.Services.AddScoped<IDepartmentRepository,DepartmentRepository>();
             //builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             builder.Services.AddDbContext<ElAreffDbContext>(options =>
             {
