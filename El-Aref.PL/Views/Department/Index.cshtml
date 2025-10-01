@@ -1,12 +1,6 @@
-﻿
-@model IEnumerable<Department>
+﻿@model IEnumerable<Department>
 
-
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
-<h1>All Deparment</h1>
+<h1>All Departments</h1>
 <br />
 <br />
 
@@ -17,40 +11,36 @@
 
 @if (Model != null && Model.Any())
 {
-    <table class=" table table-hover table-striped">
+    <table class="table table-hover table-striped">
         <thead>
             <tr>
                 <th>Code</th>
                 <th>Name</th>
                 <th>Date Of Creation</th>
-                <th>Deatails</th>
+                <th>Details</th>
                 <th>Update</th>
                 <th>Delete</th>
-
             </tr>
-
         </thead>
 
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var dept in Model)
             {
                 <tr>
-                    <td>@item.Code</td>
-                    <td>@item.Name</td>
-                    <td>@item.CraeteAt</td>
+                    <td>@dept.Code</td>
+                    <td>@dept.Name</td>
+                    <td>@dept.CraeteAt</td>
 
-                    <partial name="_ButtonPartialView" model="@item.Id" />
-
-
+                    <partial name="_ButtonPartialView"
+                             model="@(new ButtonPartialViewModel { Id = dept.Id, Controller = "Department" })" />
                 </tr>
             }
         </tbody>
     </table>
-
 }
 else
 {
-    <div class=" mt-4 alert alert-info">
+    <div class="mt-4 alert alert-info">
         There are no Departments :(
     </div>
 }
