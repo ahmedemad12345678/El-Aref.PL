@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace El_Aref.BLL.Repositores
 {
@@ -15,11 +16,15 @@ namespace El_Aref.BLL.Repositores
 
         public GenaricRepository(ElAreffDbContext context)
         {
-            this._context = context;
+            _context = context;
         }
 
         public IEnumerable<T> GetAll()
         {
+            if(typeof(T)==typeof(Employee))
+            {
+                return (IEnumerable<T>)_context.Employees.Include(E=>E.Department).ToList() ;
+            }
             return _context.Set<T>().ToList();
         }
 
@@ -48,6 +53,7 @@ namespace El_Aref.BLL.Repositores
             _context.Set<T>().Remove(model);
             return _context.SaveChanges();
         }
+        
 
     }
 }

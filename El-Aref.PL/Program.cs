@@ -1,5 +1,6 @@
 using El_Aref.BLL.Interfaces;
 using El_Aref.DAL.Data.Contexts;
+using El_Aref.PL.Mappling;
 using EL_Areff.Comapny.BLL.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,7 @@ namespace El_Aref.PL
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            builder.Services.AddAutoMapper(M=>M.AddProfile(new EmployeeProfile()));
 
             var app = builder.Build();
 

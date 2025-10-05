@@ -14,9 +14,21 @@ namespace El_Aref.PL.Controllers
         {
             _department = department;
         }
-        public IActionResult Index()
+        public IActionResult Index(string? SearchInput)
         {
             var departments = _department.GetAll();
+            if (string.IsNullOrEmpty(SearchInput))
+            {
+                departments = _department.GetAll();
+                return View(departments);
+            }
+            else
+            {
+                departments = _department.GetByName(SearchInput);
+                return View(departments);
+            }
+            
+
             return View(departments);
         }
 
@@ -36,6 +48,7 @@ namespace El_Aref.PL.Controllers
                     Code = model.Code,
                     Name = model.Name,
                     CraeteAt = model.CraeteAt,
+                    
                 };
                 var result = _department.Add(department);
                 if (result > 0)
