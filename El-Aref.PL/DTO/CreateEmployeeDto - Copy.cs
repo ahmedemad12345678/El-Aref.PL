@@ -5,6 +5,8 @@ namespace El_Aref.PL.DTO
 {
     public class CreateEmployeeTDO
     {
+        internal int? DepartmentId;
+
         [Required(ErrorMessage = "Name is required !!")]
         public string Name { get; set; }
         [Range(22, 60, ErrorMessage = "Age must be between 22 and 60 ")]

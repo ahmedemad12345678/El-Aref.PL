@@ -12,5 +12,6 @@ namespace El_Aref.DAL.Model
         public string Name { get; set; } = string.Empty;
 
         public DateTime CraeteAt { get; set; }
+        public List<Employee> Employees { get; set; }
     }
 }

@@ -9,5 +9,6 @@ namespace El_Aref.BLL.Interfaces
 {
     public interface IDepartmentRepository: IGenaricRepository<Department>
     {
+        List<Department>? GetByName(string name);
     }
 }

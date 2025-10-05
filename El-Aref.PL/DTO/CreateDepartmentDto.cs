@@ -12,5 +12,7 @@ namespace El_Aref.PL.DTO
 
         [Required(ErrorMessage = "CraeteAt is Required !")]
         public DateTime CraeteAt { get; set; }
+
+        public int? DeprtmentId { get; set; }
     }
 }
