@@ -1,7 +1,7 @@
 ﻿@model CreateEmployeeTDO
-@{
+@* @{
     ViewData["Title"] = "Create";
-}
+} *@
 
 
 
@@ -9,7 +9,7 @@
 <h1>Create Employee</h1>
 
 
-<form asp-action="Create">
+<form asp-action="Create" enctype="multipart/form-data">
     <partial name="EmployeePartialView/_CreateEditPartialView" />
 
 

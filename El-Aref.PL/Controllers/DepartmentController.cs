@@ -1,30 +1,39 @@
-﻿using El_Aref.BLL.Interfaces;
+﻿using AutoMapper;
+using El_Aref.BLL.Interfaces;
 using El_Aref.DAL.Model;
 using El_Aref.PL.DTO;
 using EL_Areff.Comapny.BLL.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace El_Aref.PL.Controllers
 {
     public class DepartmentController : Controller
     {
-        private readonly IDepartmentRepository _department;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public DepartmentController( IDepartmentRepository department)
+        //private readonly IDepartmentRepository _department;
+
+        public DepartmentController( /*IDepartmentRepository department*/
+                                     IUnitOfWork unitOfWork,
+                                     IMapper mapper)
         {
-            _department = department;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            //_department = department;
         }
-        public IActionResult Index(string? SearchInput)
+        public async Task<IActionResult> Index(string? SearchInput)
         {
-            var departments = _department.GetAll();
+            var departments = await _unitOfWork.DepartmentRepository.GetAllAsync();
             if (string.IsNullOrEmpty(SearchInput))
             {
-                departments = _department.GetAll();
+                departments =await _unitOfWork.DepartmentRepository.GetAllAsync();
                 return View(departments);
             }
             else
             {
-                departments = _department.GetByName(SearchInput);
+                departments = _unitOfWork.DepartmentRepository.GetByName(SearchInput);
                 return View(departments);
             }
             
@@ -39,7 +48,7 @@ namespace El_Aref.PL.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CreateDepartmentDto model)
+        public async Task<IActionResult> Create(CreateDepartmentDto model)
         {
             if (ModelState.IsValid)
             {
@@ -50,7 +59,9 @@ namespace El_Aref.PL.Controllers
                     CraeteAt = model.CraeteAt,
                     
                 };
-                var result = _department.Add(department);
+                await _unitOfWork.DepartmentRepository.AddAsync(department);
+                
+                var result =await _unitOfWork.ComleteAsync();
                 if (result > 0)
                 {
                     return RedirectToAction("Index");
@@ -61,19 +72,19 @@ namespace El_Aref.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int? id, string viewname = "Details")
+        public async Task<IActionResult> Details(int? id, string viewname = "Details")
         {
             if (id is null) return BadRequest("Invalid Id");
-            var result = _department.Get(id.Value);
+            var result =await _unitOfWork.DepartmentRepository.GetAsync(id.Value);
             if (result is null) return NotFound(new { StatusCode = 400, Message = $"department with id {id} id not found" });
             return View(viewname, result);
         }
 
         [HttpGet]
-        public IActionResult Update(int? id)
+        public async Task<IActionResult> Update(int? id)
         {
             if (id is null) return BadRequest("invalid Id");
-            var result = _department.Get(id.Value);
+            var result =await _unitOfWork.DepartmentRepository.GetAsync(id.Value);
             if (result is null) return NotFound(new { StatusCode = 400, Message = $"department with id {id} id not found" });
 
             var department = new CreateDepartmentDto()
@@ -82,6 +93,7 @@ namespace El_Aref.PL.Controllers
                 Name = result.Name,
                 CraeteAt = result.CraeteAt,
             };
+            
 
 
             return View(department);
@@ -89,7 +101,7 @@ namespace El_Aref.PL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Update([FromRoute] int id, Department model)
+        public async Task<IActionResult> Update([FromRoute] int id, CreateDepartmentDto model)
         {
             if (ModelState.IsValid)
             {
@@ -101,7 +113,8 @@ namespace El_Aref.PL.Controllers
                     Name = model.Name,
                     CraeteAt = model.CraeteAt,
                 };
-                var result = _department.Update(department);
+                _unitOfWork.DepartmentRepository.Update(department);
+                var result = await _unitOfWork.ComleteAsync();
                 if (result > 0)
                 {
                     return RedirectToAction(nameof(Index));
@@ -111,20 +124,21 @@ namespace El_Aref.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             //if (id is null) return BadRequest("Invaid Id");
             //var department = _departmentRepository.Get(id.Value);
             //if(department is null ) return NotFound(new { StatusCode = 400, Message = $"department with id {id} id not found" });
-            return Details(id, "Delete");
+            return await Details(id, "Delete");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete([FromRoute] int id, Department model)
+        public async Task<IActionResult> Delete([FromRoute] int id, Department model)
         {
             if (id != model.Id) return BadRequest();
-            var result = _department.Delete(model);
+            _unitOfWork.DepartmentRepository.Delete(model);
+            var result =await _unitOfWork.ComleteAsync();
             if (result > 0)
             {
                 return RedirectToAction(nameof(Index));

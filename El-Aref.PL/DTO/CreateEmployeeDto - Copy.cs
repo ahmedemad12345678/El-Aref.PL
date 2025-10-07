@@ -29,5 +29,8 @@ namespace El_Aref.PL.DTO
         public DateTime HiringDate { get; set; }
         [DisplayName("create At")]
         public DateTime CreateAt { get; set; }
+        public string? ImageName { get; set; }
+
+        public IFormFile? Image { get; set; }
     }
 }
