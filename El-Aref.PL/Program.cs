@@ -1,8 +1,12 @@
 using El_Aref.BLL.Interfaces;
+using El_Aref.BLL.Repositores;
 using El_Aref.DAL.Data.Contexts;
+using El_Aref.DAL.Model;
 using El_Aref.PL.Mappling;
 using EL_Areff.Comapny.BLL.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Principal;
 
 namespace El_Aref.PL
 {
@@ -18,11 +22,26 @@ namespace El_Aref.PL
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IDepartmentRepository,DepartmentRepository>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddDbContext<ElAreffDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
             builder.Services.AddAutoMapper(M=>M.AddProfile(new EmployeeProfile()));
+            //builder.Services.AddIdentity<AppUser, IdentityRole>();
+            builder.Services.AddIdentity<AppUser, IdentityRole>()
+            .AddEntityFrameworkStores<ElAreffDbContext>()
+            .AddDefaultTokenProviders();
+            builder.Services.ConfigureApplicationCookie(config =>
+            {
+                config.LoginPath = "/Account/SignIn";
+              
+
+            });
+            
+
+
+
 
             var app = builder.Build();
 
@@ -38,6 +57,9 @@ namespace El_Aref.PL
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseAuthorization();
 

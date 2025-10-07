@@ -5,36 +5,44 @@ using Microsoft.AspNetCore.Mvc;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using El_Aref.PL.Helper;
+using System.Threading.Tasks;
 
 
 namespace El_Aref.PL.Controllers
 {
     public class EmployeeController : Controller
     {
-       private readonly IEmployeeRepository _employeeRepository;
-        private readonly IDepartmentRepository _departmentRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
+        //private readonly IEmployeeRepository _employeeRepository;
+        // private readonly IDepartmentRepository _departmentRepository;
         private readonly IMapper _mapper;
 
-        public EmployeeController(IEmployeeRepository employeeRepository,IDepartmentRepository departmentRepository, 
-                                  IMapper mapper)
+        public EmployeeController(
+                                    //IEmployeeRepository employeeRepository,
+                                    //IDepartmentRepository departmentRepository,
+                                    IUnitOfWork unitOfWork,
+                                    IMapper mapper)
         {
-            _employeeRepository = employeeRepository;
-            _departmentRepository = departmentRepository;
+            _unitOfWork = unitOfWork;
+            //_employeeRepository = employeeRepository;
+            //_departmentRepository = departmentRepository;
             _mapper = mapper;
         }
 
             [HttpGet]
-            public IActionResult Index(string? SearchInput)
+            public async Task<IActionResult> Index(string? SearchInput)
             {
                 IEnumerable<Employee> employees;
                 if (string.IsNullOrEmpty(SearchInput))
                 {
-                    employees = _employeeRepository.GetAll();
+                    employees = await _unitOfWork.EmployeeRepository.GetAllAsync();
                 
                 }
                 else
                 {
-                    employees = _employeeRepository.GetByName (SearchInput);
+                    employees = await _unitOfWork.EmployeeRepository.GetByNameAsync(SearchInput);
                 }
                 // Dictionary :
                 // 1.ViewData : Transfer Exrta Information From Controller (Action) To View 
@@ -49,50 +57,41 @@ namespace El_Aref.PL.Controllers
                 return View(employees);
             }
             [HttpGet]
-            public IActionResult Create()
+            public async Task<IActionResult> Create()
             {
-                var deprtments = _departmentRepository.GetAll();
+                var deprtments = await _unitOfWork.DepartmentRepository.GetAllAsync();
                 ViewData["deprtments"] = deprtments;
                 return View();
             }
             [HttpPost]
-            public IActionResult Create(CreateEmployeeTDO model)
+            public async Task<IActionResult> Create(CreateEmployeeTDO model)
             {
                 if (ModelState.IsValid)
                 {
-                    //var employee = new Employee()
-                    //{
-                    //    Name = model.Name,
-                    //    Age = model.Age,
-                    //    Email = model.Email,
-                    //    Address = model.Address,
-                    //    CreateAt = model.CreateAt,
-                    //    HiringDate = model.HiringDate,
-                    //    IsActive = model.IsActive,
-                    //    IsDeleted = model.IsDeleted,
-                    //    Phone = model.Phone,
-                    //    Salary = model.Salary,
-                        
-                        
-                    //};
-                    var employee= _mapper.Map<Employee>(model);
-
-
-                var count = _employeeRepository.Add(employee);
-                    if (count > 0)
+                    if (model.Image is not null)
                     {
-                            TempData["Message"] = "Employee Added Successfully";
-                            return RedirectToAction(nameof(Index));
+                        model.ImageName = DocumentSettings.UpLoadFile(model.Image, "images");
                     }
-                    
+
+                    var employee = _mapper.Map<Employee>(model);
+                    await _unitOfWork.EmployeeRepository.AddAsync(employee);
+
+                     var count =await _unitOfWork.ComleteAsync();
+                     if (count > 0)
+                     {
+                         
+                        TempData["Message"] = "Employee Added Successfully";
+                                 return RedirectToAction(nameof(Index));
+                     }
+                         
+                     }
+                    return View(model);
                 }
-                return View(model);
-            }
             [HttpGet]
-            public IActionResult Details(int? id, string viewname = "Details")
+            public async Task<IActionResult> Details(int? id, string viewname = "Details")
             {
                 if (id is null) return BadRequest("Invalid Id");
-                var Emp = _employeeRepository.Get(id.Value);
+                var Emp =await _unitOfWork.EmployeeRepository.GetAsync(id.Value);
                 if (Emp is null) return NotFound("Not Found");
                 return View(viewname, Emp);
 
@@ -100,56 +99,42 @@ namespace El_Aref.PL.Controllers
             
 
         [HttpGet]
-        public IActionResult Update(int? id)
+        public async Task<IActionResult> Update(int? id)
         {
             if (id is null) return BadRequest("Invalid Id");
 
-            var emp = _employeeRepository.Get(id.Value);
+            var emp =await _unitOfWork.EmployeeRepository.GetAsync(id.Value);
+            var department =await _unitOfWork.DepartmentRepository.GetAllAsync();
             if (emp is null) return NotFound("Not Found");
 
-            var employeeDTO = new CreateEmployeeTDO()
-            {
-                Name = emp.Name,
-                Age = emp.Age,
-                Email = emp.Email,
-                Address = emp.Address,
-                CreateAt = emp.CreateAt,
-                HiringDate = emp.HiringDate,
-                IsActive = emp.IsActive,
-                IsDeleted = emp.IsDeleted,
-                Phone = emp.Phone,
-                Salary = emp.Salary,
-                DepartmentId = emp.DepartmentId
-            };
+           
 
             // ✅ أضف هذه السطور
-            var departments = _departmentRepository.GetAll();
-            ViewData["deprtments"] = departments;
+            var employeeDTO = _mapper.Map<CreateEmployeeTDO>(emp);
+            ViewData["deprtments"] = department;
 
             return View(employeeDTO);
         }
 
         [HttpPost]
             [ValidateAntiForgeryToken]
-            public IActionResult Update([FromRoute] int id, CreateEmployeeTDO model)
+            public async Task<IActionResult> Update([FromRoute] int id, CreateEmployeeTDO model)
             {
                 if (ModelState.IsValid)
                 {
-                    var employee = new Employee()
+
+                    if (model.ImageName is not null && model.Image is not null)
                     {
-                        Id = id,
-                        Name = model.Name,
-                        Age = model.Age,
-                        Email = model.Email,
-                        Address = model.Address,
-                        CreateAt = model.CreateAt,
-                        HiringDate = model.HiringDate,
-                        IsActive = model.IsActive,
-                        IsDeleted = model.IsDeleted,
-                        Phone = model.Phone,
-                        Salary = model.Salary
-                    };
-                    var result = _employeeRepository.Update(employee);
+                        DocumentSettings.DeleteFile(model.ImageName, "images");
+                    }
+                    if (model.Image is not null)
+                    {
+                        model.ImageName = DocumentSettings.UpLoadFile(model.Image, "images");
+                    }
+
+                    var employee = _mapper.Map<Employee>(model);
+                    _unitOfWork.EmployeeRepository.Update(employee);
+                    var result =await _unitOfWork.ComleteAsync();
                     if (result > 0)
                     {
                         return RedirectToAction(nameof(Index));
@@ -159,21 +144,32 @@ namespace El_Aref.PL.Controllers
             }
 
             [HttpGet]
-            public IActionResult Delete(int? id)
+            public async Task<IActionResult> Delete(int? id)
             {
 
-                return Details(id, "Delete");
+                return await Details(id, "Delete");
             }
 
             [HttpPost]
             [ValidateAntiForgeryToken]
-            public IActionResult Delete([FromRoute] int id, Employee model)
+            public async Task<IActionResult> Delete([FromRoute] int id, Employee model)
             {
+                
+                
+
                 if (id != model.Id) return BadRequest();
-                var result = _employeeRepository.Delete(model);
+                _unitOfWork.EmployeeRepository.Delete(model);
+                var result = await _unitOfWork.ComleteAsync();
+
                 if (result > 0)
                 {
-                    return RedirectToAction(nameof(Index));
+
+                    if(model.ImageName is not null)
+                    {
+                        DocumentSettings.DeleteFile(model.ImageName, "images");
+                }
+
+                return RedirectToAction(nameof(Index));
                 }
                 return View(model);
             }
